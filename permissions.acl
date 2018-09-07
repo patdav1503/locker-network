@@ -12,6 +12,50 @@
  * limitations under the License.
  */
 
+/**
+ * Rules for Participant registry access
+ */
+rule Member_R_Member {
+    description: "Grant Members access to Member resources"
+    participant: "org.locker.mynetwork.Member"
+    operation: READ
+    resource: "org.locker.mynetwork.Member"
+    action: ALLOW
+}
+ 
+rule Admin {
+    description: "Allow the admin full access"
+    participant: "org.locker.mynetwork.Admin"
+    operation: ALL
+    resource: "org.locker.mynetwork.*"
+    action: ALLOW
+}
+
+rule LockerOwner {
+    description: "Allow the owner of a locker total access"
+    participant(u): "org.locker.mynetwork.User"
+    operation: ALL
+    resource(m): "org.locker.mynetwork.TransactionLocker"
+    condition: (m.owner.getIdentifier() == u.getIdentifier())
+    action: ALLOW
+}
+
+rule EverybodyCanGetSquares {
+    description: "Allow all participants to submit send transactions"
+    participant: "org.locker.mynetwork.User"
+    operation: CREATE
+    resource: "org.locker.mynetwork.doSquare"
+    action: ALLOW
+}
+
+rule SystemACL {
+  description:  "System ACL to permit all access"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
 rule NetworkAdminUser {
     description: "Grant business network administrators full access to user resources"
     participant: "org.hyperledger.composer.system.NetworkAdmin"

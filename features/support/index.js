@@ -12,37 +12,17 @@
  * limitations under the License.
  */
 
-/**
- * Write your model definitions here
- */
+'use strict';
 
-namespace org.locker.mynetwork
+const composerSteps = require('composer-cucumber-steps');
+const cucumber = require('cucumber');
 
-abstract participant User identified by userId {
-  o String userId
-  o String firstName
-  o String lastName
-}
+module.exports = function () {
+    composerSteps.call(this);
+};
 
-participant Member extends User {
-
-}
-
-participant Admin extends User {
-
-}
-
-abstract asset TransactionLocker identified by lockerId {
-  o String lockerId
-  --> User owner
-  o Integer errorCode
-}
-
-asset IntegerLocker extends TransactionLocker {
-  o Integer returnValue
-}
-
-transaction doSquare {
-  o String lockerId optional
-  o Integer intValue
+if (cucumber.defineSupportCode) {
+    cucumber.defineSupportCode((context) => {
+        module.exports.call(context);
+    });
 }
