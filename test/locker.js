@@ -201,6 +201,46 @@ describe('#' + namespace, () => {
         asset1.returnValue.should.equal(-1);
     });
 
+    it('Alice can remove her assets', async () => {
+        // Use the identity for Alice.
+        await useIdentity(aliceCardName);
+
+        // Remove the asset, then test the asset exists.
+        const assetRegistry = await businessNetworkConnection.getAssetRegistry(assetNS);
+        await assetRegistry.remove('1');
+        const exists = await assetRegistry.exists('1');
+        exists.should.be.false;
+    });
+
+    it('Alice cannot remove Bob\'s assets', async () => {
+        // Use the identity for Alice.
+        await useIdentity(aliceCardName);
+
+        // Remove the asset, then test the asset exists.
+        const assetRegistry = await businessNetworkConnection.getAssetRegistry(assetNS);
+        assetRegistry.remove('2').should.be.rejectedWith(/does not have .* access to resource/);
+    });
+
+    it('Bob can remove his assets', async () => {
+        // Use the identity for Bob.
+        await useIdentity(bobCardName);
+
+        // Remove the asset, then test the asset exists.
+        const assetRegistry = await businessNetworkConnection.getAssetRegistry(assetNS);
+        await assetRegistry.remove('2');
+        const exists = await assetRegistry.exists('2');
+        exists.should.be.false;
+    });
+
+    it('Bob cannot remove Alice\'s assets', async () => {
+        // Use the identity for Bob.
+        await useIdentity(bobCardName);
+
+        // Remove the asset, then test the asset exists.
+        const assetRegistry = await businessNetworkConnection.getAssetRegistry(assetNS);
+        assetRegistry.remove('1').should.be.rejectedWith(/does not have .* access to resource/);
+    });
+
     it('Alice can get a square', async () => {
         // Use the identity for Alice.
         await useIdentity(aliceCardName);
@@ -217,6 +257,26 @@ describe('#' + namespace, () => {
 
         // Validate the asset.
         asset1.owner.getFullyQualifiedIdentifier().should.equal(participantNS + '#alice@email.com');
+        asset1.returnValue.should.equal(100);
+
+    });
+
+    it('Bob can get a square', async () => {
+        // Use the identity for Bob.
+        await useIdentity(bobCardName);
+
+        // Submit the reply.
+        const myTrans = factory.newTransaction(namespace, 'doSquare');
+        myTrans.lockerId = '51';
+        myTrans.intValue = 10;
+        await businessNetworkConnection.submitTransaction(myTrans);
+
+        // Get the asset.
+        const assetRegistry = await businessNetworkConnection.getAssetRegistry(namespace + '.' + 'IntegerLocker');
+        const asset1 = await assetRegistry.get('51');
+
+        // Validate the asset.
+        asset1.owner.getFullyQualifiedIdentifier().should.equal(participantNS + '#bob@email.com');
         asset1.returnValue.should.equal(100);
 
     });
